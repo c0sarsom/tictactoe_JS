@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            justify-content: center;
+            margin: 20px auto;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid black;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .cell.taken {
+            pointer-events: none;
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <p id="playerTurn"></p>
+    <div class="board" id="board"></div>
+    <p id="result"></p>
+    <button onclick="resetGame()">Új játék</button>
+
+    <script>
+        const board = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9']
+        ];
+        let moveCount = 0;
+        let player1 = prompt("Adja meg az első játékos nevét:");
+        let player2 = prompt("Adja meg a második játékos nevét:");
+        let currentPlayer = player1;
+        let currentMark = 'X';
+
+        function createBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.textContent = board[i][j];
+                    cell.addEventListener('click', handleMove);
+                    boardElement.appendChild(cell);
+                }
+            }
+            updatePlayerTurn();
+        }
+
+        function handleMove(event) {
+            const row = event.target.dataset.row;
+            const col = event.target.dataset.col;
+
+            if (board[row][col] === 'X' || board[row][col] === 'O') {
+                alert("Ez a mező már foglalt!");
+                return;
+            }
+
+            board[row][col] = currentMark;
+            moveCount++;
+            event.target.textContent = currentMark;
+            event.target.classList.add('taken');
+
+            if (checkWin()) {
+                document.getElementById('result').textContent = `Gratulálunk, ${currentPlayer}! Nyertél!`;
+                disableBoard();
+                return;
+            }
+
+            if (moveCount === 9) {
+                document.getElementById('result').textContent = "Döntetlen! A tábla betelt.";
+                return;
+            }
+
+            switchPlayer();
+            updatePlayerTurn();
+        }
+
+        function switchPlayer() {
+            currentMark = currentMark === 'X' ? 'O' : 'X';
+            currentPlayer = currentPlayer === player1 ? player2 : player1;
+        }
+
+        function updatePlayerTurn() {
+            document.getElementById('playerTurn').textContent = `${currentPlayer} (${currentMark}) következik.`;
+        }
+
+        function checkWin() {
+            for (let i = 0; i < 3; i++) {
+                if (board[i][0] === currentMark && board[i][1] === currentMark && board[i][2] === currentMark)
+                    return true;
+                if (board[0][i] === currentMark && board[1][i] === currentMark && board[2][i] === currentMark)
+                    return true;
+            }
+            if (board[0][0] === currentMark && board[1][1] === currentMark && board[2][2] === currentMark)
+                return true;
+            if (board[0][2] === currentMark && board[1][1] === currentMark && board[2][0] === currentMark)
+                return true;
+            return false;
+        }
+
+        function disableBoard() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => cell.classList.add('taken'));
+        }
+
+        function resetGame() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    board[i][j] = (i * 3 + j + 1).toString();
+                }
+            }
+            moveCount = 0;
+            currentPlayer = player1;
+            currentMark = 'X';
+            document.getElementById('result').textContent = '';
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
